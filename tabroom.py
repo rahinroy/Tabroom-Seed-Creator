@@ -45,7 +45,7 @@ for x in (range(len(totalRounds))):
 		prelimCounter = prelimCounter + 1
 rounds = prelimCounter
 times = rounds*2
-
+print(rounds)
 
 totalSpeaks = np.zeros((len(names), times))
 highLow = [0]*len(names)
@@ -84,11 +84,10 @@ for tms in range(len(html)):
 			prelimWL[x] = 1
 		if (str(dataList[x].text.strip()) == "L"):
 			prelimWL[x] = 0
-	#print (prelimWL)
-	for x in range(rounds-numByes):
-		if (prelimWL[len(prelimWL)-x-1] == 1):
-			wins[tms] = wins[tms] + 1
-
+	if (len(prelimWL) >= rounds):
+		for x in range(rounds-numByes):
+			if (prelimWL[len(prelimWL)-x-1] == 1):
+				wins[tms] = wins[tms] + 1
 
 
 #print (wins)
