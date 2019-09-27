@@ -4,9 +4,8 @@ import numpy as np
 import math
 
 
-ogPage = "https://www.tabroom.com/index/tourn/postings/round.mhtml?tourn_id=13121&round_id=440666"
-rounds = 5
-times = rounds*2
+ogPage = input("Enter Round 1 pairings URL (w/ https://):")
+
 
 page = urllib.request.urlopen(ogPage)
 tab = soup(page, "html.parser")
@@ -26,10 +25,31 @@ for x in range(length):
 		html.append(dataList[x].get("href"))
 #print (names)
 
+
+
+
+prelimPage  = "https://www.tabroom.com" + str(html[0])
+page = urllib.request.urlopen(prelimPage)
+tab = soup(page, "html.parser")
+
+data = tab.find_all(class_= "tenth semibold")
+dataList = list(data)
+length = len(dataList)
+totalRounds = []
+prelimCounter = 0 
+
+for x in range(length):
+	totalRounds.append(dataList[x].text.strip())
+for x in (range(len(totalRounds))):
+	if ("Round" in totalRounds[x]):
+		prelimCounter = prelimCounter + 1
+rounds = prelimCounter
+times = rounds*2
+
+
 totalSpeaks = np.zeros((len(names), times))
 highLow = [0]*len(names)
 wins = [0]*len(names)
-
 
 for tms in range(len(html)):
 	numByes = 0;	
