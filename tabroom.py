@@ -105,6 +105,14 @@ for tms in range(len(names)):
 	cumeSpeaks = 0 
 	byes = 0
 
+allSpeaks = [0]*len(names)
+
+
+for x in range(len(allSpeaks)):
+	for y in range(times):
+		allSpeaks[x] = allSpeaks[x] + totalSpeaks[x,y]
+
+
 #low high
 for tms in range(len(names)):
 	max1 = 0
@@ -158,9 +166,14 @@ for totalWins in range(rounds):
 			prelimWins.append(tms);
 	for y in range(len(prelimWins)):
 		for x in range(len(prelimWins)):
-			if (tempHL[prelimWins[x]] > highest):
-				highest = tempHL[prelimWins[x]]
-				highestPos = prelimWins[x]
+			if (tempHL[prelimWins[x]] >= highest):
+				if (tempHL[prelimWins[x]] == highest):
+					if (allSpeaks[prelimWins[x]] > allSpeaks[highestPos]):
+						highest = tempHL[prelimWins[x]]
+						highestPos = prelimWins[x]
+				else: 
+					highest = tempHL[prelimWins[x]]
+					highestPos = prelimWins[x]
 		tempHL[highestPos] = 0
 		seeds.append(names[highestPos])
 		highest = 0;
