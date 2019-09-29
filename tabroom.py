@@ -179,7 +179,9 @@ for totalWins in range(rounds):
 		highest = 0;
 		highestPos = 0
 	prelimWins = []
-print(seeds)
+for x in range(len(seeds)):
+	print(str(x+1) + ". " + str(seeds[x]))
+
 
 
 
