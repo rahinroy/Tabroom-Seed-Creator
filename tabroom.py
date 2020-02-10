@@ -20,9 +20,9 @@ dataList = list(data)
 length = len(dataList)
 
 for x in range(length):
-	if not ("," in str(dataList[x].text.strip())):
-		names.append(dataList[x].text.strip())
-		html.append(dataList[x].get("href"))
+    if not ("," in str(dataList[x].text.strip())):
+        names.append(dataList[x].text.strip())
+        html.append(dataList[x].get("href"))
 #print (names)
 
 
@@ -39,163 +39,126 @@ totalRounds = []
 prelimCounter = 0 
 
 for x in range(length):
-	totalRounds.append(dataList[x].text.strip())
+    totalRounds.append(dataList[x].text.strip())
 for x in (range(len(totalRounds))):
-	if ("Round" in totalRounds[x]):
-		prelimCounter = prelimCounter + 1
+    if ("Round" in totalRounds[x]):
+        prelimCounter = prelimCounter + 1
 rounds = prelimCounter
 times = rounds*2
 print(rounds)
 
-totalSpeaks = np.zeros((len(names), times))
 highLow = [0]*len(names)
 wins = [0]*len(names)
-
 for tms in range(len(html)):
-	numByes = 0;	
-	ogPage = "https://www.tabroom.com" + str(html[tms])
-	page = urllib.request.urlopen(ogPage)
-	tab = soup(page, "html.parser")
+    numByes = 0;
+    ogPage = "https://www.tabroom.com" + str(html[tms])
+    page = urllib.request.urlopen(ogPage)
+    tab = soup(page, "html.parser")
 
-	data = tab.find_all(class_= "fifth marno")
-	dataList = list(data)
-	length = len(dataList)
+    #side or bye
+    side = tab.find_all(class_= "tenth")
+    sideList = list(side)
 
-	for x in range(length):
-		if (float(dataList[x].text.strip()) > 5):
-			totalSpeaks[tms, math.ceil(x/2) - 1] = dataList[x].text.strip()
-
-	data = tab.find_all(class_= "tenth")
-	dataList = list(data)
-	length = len(dataList)
-
-	for x in range(length):
-		if (str(dataList[x].text.strip()) == "Bye"):
-			numByes = numByes + 1
-			wins[tms] = wins[tms] + 1
-
-	data = tab.find_all(class_= "tenth centeralign semibold")
-	dataList = list(data)
-	length = len(dataList)
-	prelimWL = [0]*length
-
-	for x in range(length):
-		if (str(dataList[x].text.strip()) == "W"):
-			prelimWL[x] = 1
-		if (str(dataList[x].text.strip()) == "L"):
-			prelimWL[x] = 0
-	if (len(prelimWL) >= rounds):
-		for x in range(rounds-numByes):
-			if (prelimWL[len(prelimWL)-x-1] == 1):
-				wins[tms] = wins[tms] + 1
-
-
-#print (wins)
-#fixing byes
-for tms in range(len(names)):
-	for rds in range(times):
-		cumeSpeaks = cumeSpeaks + totalSpeaks[tms, rds]
-		if (totalSpeaks[tms, rds] == 0):
-			byes = byes + 1
-
-	avg = cumeSpeaks/(times-byes)
-	for rds in range(times):
-		if (totalSpeaks[tms, rds] == 0):
-			totalSpeaks[tms, rds] = avg
-	cumeSpeaks = 0 
-	byes = 0
-
-allSpeaks = [0]*len(names)
-
-
-for x in range(len(allSpeaks)):
-	for y in range(times):
-		allSpeaks[x] = allSpeaks[x] + totalSpeaks[x,y]
-
-
-#low high
-for tms in range(len(names)):
-	max1 = 0
-	min1 = 31
-	usedMax1 = 0
-	usedMin1 = 0
-	usedMax2 = 0
-	usedMin2 = 0
-	max2 = 0
-	min2 = 31
-	count = 0
-	for rds in range(rounds):
-		#first speaker
-		if (max1 > totalSpeaks[tms, rds*2]):
-			max1 = totalSpeaks[tms, rds*2]
-		if (min1 < totalSpeaks[tms, rds*2]):
-			min1 = totalSpeaks[tms, rds*2]
-		#second speaker
-		if (max2 > totalSpeaks[tms, rds*2+1]):
-			max2 = totalSpeaks[tms, rds*2+1]
-		if (min2 < totalSpeaks[tms, rds*2+1]):
-			min2 = totalSpeaks[tms, rds*2+1]
-	for rds in range(times):
-		if (rds%2 == 0 and totalSpeaks[tms, rds] == max1 and usedMax1 == 0):
-			usedMax1 = 1
-		elif (rds%2 == 0 and totalSpeaks[tms, rds] == min1 and usedMin1 == 0):
-			usedMin1 = 1
-		elif (rds%2 == 0):
-			highLow[tms] = highLow[tms] + totalSpeaks[tms, rds]
-			count = count+1
-
-		if (rds%2 == 1 and totalSpeaks[tms, rds] == max1 and usedMax2 == 0):
-			usedMax2 = 1
-		elif (rds%2 == 1 and totalSpeaks[tms, rds] == min1 and usedMin2 == 0):
-			usedMin2 = 1
-		elif (rds%2 == 1):
-			highLow[tms] = highLow[tms] + totalSpeaks[tms, rds]
-			count = count+1
-#print (highLow)
-
-prelimWins = []
-tempHL = highLow
-final = [0]*len(names)
-highest = 0;
-seeds = []
-highestPos = 0;
-
-for totalWins in range(rounds):
-	for tms in range(len(names)):
-		if (wins[tms] == (rounds-totalWins)):
-			prelimWins.append(tms);
-	for y in range(len(prelimWins)):
-		for x in range(len(prelimWins)):
-			if (tempHL[prelimWins[x]] >= highest):
-				if (tempHL[prelimWins[x]] == highest):
-					if (allSpeaks[prelimWins[x]] > allSpeaks[highestPos]):
-						highest = tempHL[prelimWins[x]]
-						highestPos = prelimWins[x]
-				else: 
-					highest = tempHL[prelimWins[x]]
-					highestPos = prelimWins[x]
-		tempHL[highestPos] = 0
-		seeds.append(names[highestPos])
-		highest = 0;
-		highestPos = 0
-	prelimWins = []
-for x in range(len(seeds)):
-	print(str(x+1) + ". " + str(seeds[x]))
+    #for x in range(len(sideList)):
+#         if (str(sideList[x].text.strip()) == "Bye"):
+#             numByes = numByes + 1
+            #wins[tms] = wins[tms] + 1
+    #round number        
+    roundInfo = tab.find_all(class_="tenth semibold")
+    roundList = list(roundInfo)
+    
+    #win or lose
+    data = tab.find_all(class_= "tenth centeralign semibold")
+    dataList = list(data)
+    length = len(dataList)
+    
+    #opp names
+    oppList = list(tab.find_all(class_="white padtop padbottom"))
+    if (rounds <= length):
+        #print (names[tms] + " " + str(rounds-numByes))
+        for x in range(rounds):
+            #print (names[tms] + " " + dataList[len(dataList) - 1 - x].text.strip())
+            if (dataList[len(dataList) - 1 - x].text.strip() == "W"):
+                wins[tms] = wins[tms] + 1
+            if (dataList[len(dataList) - 1 - x].text.strip() == ""):
+                wins[tms] = wins[tms] + 1
+                numByes += 1
+    
+    
+    speaksList = list(tab.find_all(class_="fifth marno"))
+    tempList = []
+    for x in range(len(speaksList)):
+        tempList.append(speaksList[x].text.strip())
+    speaks.append(tempList)
+    sum1 = 0
+    sum2 = 0
+    if (len(speaks[tms]) < (rounds*2) and len(speaks[tms]) > 0):
+        for y in range(len(speaks[tms])):
+            if (y % 2 == 0):
+                sum1 = sum1 + float(speaks[tms][y])            
+            else:
+                sum2 = sum2 + float(speaks[tms][y])
+        sum1 = float(sum1 /  ( (len(speaks[tms])) / 2))
+        sum1 = float(sum2 /  ( (len(speaks[tms])) / 2))
+    for y in range(numByes):
+        print(names[tms])
+        speaks[tms].append(sum1)
+        speaks[tms].append(sum2)
 
 
 
 
 
 
+speaker1 = []
+speaker2 = []
+for x in range(len(speaks)):
+    tempList1 = []
+    tempList2 = []
+    for y in range(len(speaks[x])):
+        if (y % 2 == 0):
+            tempList1.append(speaks[x][y])
+        else:
+            tempList2.append(speaks[x][y])
+    speaker1.append(tempList1)
+    speaker2.append(tempList2)
+for x in range(len(speaker1)):
+    speaker1[x] = [float(i) for i in speaker1[x]] 
+    speaker2[x] = [float(i) for i in speaker2[x]]
+for x in range(len(speaker1)):
+    if (len(speaker1[x]) > 2):
+        speaker1[x].remove(max(speaker1[x]))
+        speaker1[x].remove(min(speaker1[x]))
+        speaker2[x].remove(min(speaker2[x]))
+        speaker2[x].remove(max(speaker2[x]))
+total1 = []
+total2 = []
+totalHL = []
+for x in range(len(speaker1)):
+    total1.append(sum(speaker1[x]))
+    total2.append(sum(speaker2[x]))
+for x in range(len(speaker1)):
+    totalHL.append(total1[x] + total2[x])
+# for x in range(len(names)):
+#     print(names[x] + " " + str(wins[x]) + " " + str(speaker1[x]) + " " + str(speaker2[x]) + " " + str(totalHL[x]))
 
-	
+fin = []
+for x in reversed(range(rounds+1)):
+    temp = []
+    for tms in range(len(names)):
+        if (wins[tms] == x):
+            temp.append(tms) 
+    
+    dio = {}
+    for y in range(len(temp)):
+        dio[temp[y]] = totalHL[temp[y]]
+    ah = sorted(dio, key=dio.get, reverse=True)
+    for p in range(len(ah)):
+        fin.append(names[ah[p]])
+        #print(names[ah[p]])
+for x in range(len(fin)):
+    print (str(x+1) + ". " + fin[x])
 
 #finding actual cume speaks 
 
-
-
-
-
-
-
-
+#https://www.tabroom.com/index/tourn/postings/round.mhtml?tourn_id=15530&round_id=526576
